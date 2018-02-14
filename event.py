@@ -23,7 +23,9 @@ class Event:
 
     def read(self, file):
         self.reset_time()
+
         data = file.read()
+
         self.header =  int.from_bytes(data[:64], byteorder='big')
         self.dms = int.from_bytes(data[:2], byteorder='big')
         self.cntpps = int.from_bytes(data[2:4], byteorder='big')
@@ -66,7 +68,6 @@ class Event:
         return self.cnt133mhz*(1./133.e6)*1.e3;
 
     def corr_time(self):
-        print("Corr time !!!!!!")
         timenow = self.get_DRS_time();
         for i in range(0, self.nch):
             for j in range(0, 2):
@@ -96,11 +97,11 @@ class Event:
         else:
             return 0
 
-try:
-    f = open("Randome7kHz20kev_run1.dat", "rb")
-    ev = Event(40)
-    ev.read(f)
-except Exception as err:
-    print(err)
-finally:
-    f.close()
+#try:
+#    f = open("Randome7kHz20kev_run1.dat", "rb")
+#    ev = Event(40)
+#    ev.read(f)
+#except Exception as err:
+#    print(err)
+#finally:
+#    f.close()

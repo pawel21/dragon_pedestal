@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 from event import Event
@@ -33,7 +34,9 @@ class PedestalSimple:
                         self.rmsped[i, j, k] /= self.numped[i, j, k]
                         self.rmsped[i, j, k] = np.sqrt(self.rmsped[i, j, k] - self.meanped[i, j, k]*self.meanped[i, j, k])
                     else:
-                        print("Errot !!! Pix", i << " gain: ", j, ", capacitor ", k, " not enough events")
+                        pass
+                        #print("error pix", self.numped[i, j, k])
+                        #print("Errot !!! Pix", i << " gain: ", j, ", capacitor ", k, " not enough events")
 
 
 def remove_ped(evt, ped):
@@ -45,13 +48,30 @@ def remove_ped(evt, ped):
                 evt.samples[i, j, k] -= ped.meanped[i, j, (k+fc)%size4drs]
 
 try:
-    f = open("Randome7kHz20kev_run1.dat", "rb")
-    ev = Event(40)
-    ev.read(f)
+    f1 = open("Randome7kHz20kev_run1.dat", "rb")
+    ev1 = Event(40)
     ped = PedestalSimple()
-    ped.fill_ped_event(ev)
-    print(ev.samples[0][1][:])
-    remove_ped(ev, ped)
-    print(ev.samples[0][1][:])
+    for i in range(1, 20000):
+        f1.seek((i*1344))
+        ev1.read(f1)
+        ped.fill_ped_event(ev1)
+    ped.finalize_ped()
+    f2 = open("Randome7kHz20kev_run2.dat", "rb")
+    ev2 = Event(40)
+    for i in range(1, 20000):
+        f2.seek((i * 1344))
+        ev2.read(f2)
+    ev2_before_remove_ped = ev2.samples
+    ev_before = ev2.samples[0][0][:]
+    fig, ax = plt.subplots(2)
+    ax[0].plot(ev_before)
+    print(ev_before)
+    remove_ped(ev2, ped)
+    ev_after = ev2.samples[0][0][:]
+    print(ev_after)
+    ev2_after_remove_ped = ev2.samples
+    ax[1].plot(ev_after)
+    plt.show()
 finally:
-    f.close()
+    f1.close()
+    f2.close()
