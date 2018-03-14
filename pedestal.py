@@ -34,8 +34,7 @@ class PedestalSimple:
                         self.rmsped[i, j, k] /= self.numped[i, j, k]
                         self.rmsped[i, j, k] = np.sqrt(self.rmsped[i, j, k] - self.meanped[i, j, k]*self.meanped[i, j, k])
                     else:
-                        pass
-                        #print("error pix", self.numped[i, j, k])
+                        print("error pix", self.numped[i, j, k])
                         #print("Errot !!! Pix", i << " gain: ", j, ", capacitor ", k, " not enough events")
 
 
@@ -51,14 +50,14 @@ try:
     f1 = open("Randome7kHz20kev_run1.dat", "rb")
     ev1 = Event(40)
     ped = PedestalSimple()
-    for i in range(1, 20000):
+    for i in range(1, 2000):
         f1.seek((i*1344))
         ev1.read(f1)
         ped.fill_ped_event(ev1)
     ped.finalize_ped()
     f2 = open("Randome7kHz20kev_run2.dat", "rb")
     ev2 = Event(40)
-    for i in range(1, 20000):
+    for i in range(1, 20):
         f2.seek((i * 1344))
         ev2.read(f2)
     ev2_before_remove_ped = ev2.samples
@@ -72,6 +71,15 @@ try:
     ev2_after_remove_ped = ev2.samples
     ax[1].plot(ev_after)
     plt.show()
+
+    #statistics
+    nn = 7
+    window = 6
+    hped = np.zeros((nn, 2))
+    for i in range(0, nn):
+        for j in range(0, 2):
+            for k in range(0, 31):
+                hped[i][j] = ev2.SumSlices(i, j, k, window)/(np.sqrt(1.*window))
 finally:
     f1.close()
     f2.close()

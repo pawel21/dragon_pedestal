@@ -90,6 +90,12 @@ class Event:
                             for kk in range(fc+1024, (channel+2)*1024):
                                 self.lasttime[i, j, int(kk%4096)] = timenow
 
+    def SumSlices(self, pix, gain, pos0, num):
+        sum = 0
+        for i in range(pos0, pos0+num):
+            sum += self.samples[pix][gain][i]
+        return sum
+
     @staticmethod
     def pedtimecorr(timediff):
         if timediff > 0 and timediff<45:
