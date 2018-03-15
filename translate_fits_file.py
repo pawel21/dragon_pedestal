@@ -1,22 +1,21 @@
 import ctypes
 import numpy as np
-from numpy.ctypeslib import ndpointer
 from protozfits.simple import File
 from enum import Enum
 
 
 #read file
-f = File("Run021.1.fits.fz")
+f = File("Run019_Periodic1kHz.fits.fz")
 event = next(f.Events)
 
 eventWfSrcHG = event.hiGain.waveforms.samples
 eventWfSrcLG = event.loGain.waveforms.samples
-eventDRSSrcHG=  event.drsTagsHiGain.data
+eventDRSSrcHG = event.drsTagsHiGain.data
 eventDRSSrcLG = event.drsTagsLoGain.data
 # descination
 eventWfDestHG = np.zeros(eventWfSrcHG.shape, dtype=np.uint16)
 eventWfDestLG = np.zeros(eventWfSrcLG.shape, dtype=np.uint16)
-nbModules = 10
+nbModules = 16
 
 # load c libary to use c code
 lib = ctypes.cdll.LoadLibrary("./translatezFits.so")
