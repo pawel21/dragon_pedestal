@@ -13,9 +13,9 @@ eventWfSrcLG = event.loGain.waveforms.samples
 eventDRSSrcHG = event.drsTagsHiGain.data
 eventDRSSrcLG = event.drsTagsLoGain.data
 # descination
-eventWfDestHG = np.zeros(eventWfSrcHG.shape, dtype=np.uint16)
-eventWfDestLG = np.zeros(eventWfSrcLG.shape, dtype=np.uint16)
-nbModules = 16
+eventWfDestHG = np.zeros((6080,), dtype=np.uint16)
+eventWfDestLG = np.zeros((6080,), dtype=np.uint16)
+nbModules = 19
 
 # load c libary to use c code
 lib = ctypes.cdll.LoadLibrary("./translatezFits.so")
