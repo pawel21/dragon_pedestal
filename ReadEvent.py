@@ -36,21 +36,34 @@ def translate_fits(event):
 
 
 f = File("Run028.000.fits.fz")
-i = 0
-event = next(f.Events)
-#numer of Events: 7879
-#while next(f.Events):
-#    event = next(f.Events)
-#    i = i + 1
-#    print(i)
-
-N = 1000
+N = 500
+n_channels = 8
+n_modules = 19
+RoI = 40
+hi_gain_samples = np.zeros((N, n_channels, RoI, n_modules))
+low_gain_samples = np.zeros((N, n_channels, RoI, n_modules))
 hiGain_Ch1 = np.zeros(40*N)
+
 for i in range(0, N):
     event = next(f.Events)
     hiGain, lowGain = translate_fits(event)
-    hiGain_Ch1[i*40:(i+1)*40] = hiGain[0:40]
-    print("i = {} = {}".format(i, hiGain[0:40]))
 
-plt.hist(hiGain_Ch1, bins=50)
+    for j in range(0, n_modules):
+        for k in range(0, n_channels):
+            hi_gain_samples[i, k, 0:40, j] = hiGain[(j+k)*40:(j+k+1)*40]
+            low_gain_samples[i, k, 0:40, j] = lowGain[(j + k) * 40:(j + k + 1) * 40]
+
+
+plt.figure()
+for i in range(0, 8):
+    plt.subplot(2, 4, i+1)
+    plt.hist(hi_gain_samples[:, i, :, 0].flatten(), bins=50)
+    plt.title("Hi Gain Channel {}".format(i+1))
+
+plt.figure()
+for i in range(0, 8):
+    plt.subplot(2, 4, i+1)
+    plt.hist(low_gain_samples[:, i, :, 0].flatten(), bins=50)
+    plt.title("Low Gain Channel {}".format(i+1))
+
 plt.show()
