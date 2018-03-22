@@ -35,8 +35,24 @@ def translate_fits(event):
     return eventWfDestHG, eventWfDestLG
 
 
-f = File("Run028.000.fits.fz")
-N = 500
+#only for modules one
+def read_first_capacitor(event):
+    first_capacitor = event.firstCapacitorIds.data[0:8]
+    high = 0; low = 1
+    fc = np.zeros((2, 8))
+
+    for i in [0, 2, 4, 6]:
+        fc[high][i] = first_capacitor[i]
+        fc[high][i+1] = first_capacitor[i]
+
+    for j in [1, 3, 5, 7]:
+        fc[low][j-1] = first_capacitor[j]
+        fc[low][j] = first_capacitor[j]
+
+    return fc
+
+f = File("Run021.1.fits.fz")
+N = 15000
 n_channels = 8
 n_modules = 19
 RoI = 40
@@ -47,7 +63,7 @@ hiGain_Ch1 = np.zeros(40*N)
 for i in range(0, N):
     event = next(f.Events)
     hiGain, lowGain = translate_fits(event)
-
+    fc = read_first_capacitor(event)
     for j in range(0, n_modules):
         for k in range(0, n_channels):
             hi_gain_samples[i, k, 0:40, j] = hiGain[(j+k)*40:(j+k+1)*40]
@@ -57,13 +73,13 @@ for i in range(0, N):
 plt.figure()
 for i in range(0, 8):
     plt.subplot(2, 4, i+1)
-    plt.hist(hi_gain_samples[:, i, :, 0].flatten(), bins=50)
+    plt.hist(hi_gain_samples[:, i, 2:38, 1].flatten(), bins=50)
     plt.title("Hi Gain Channel {}".format(i+1))
 
 plt.figure()
 for i in range(0, 8):
     plt.subplot(2, 4, i+1)
-    plt.hist(low_gain_samples[:, i, :, 0].flatten(), bins=50)
+    plt.hist(low_gain_samples[:, i, 2:38, 1].flatten(), bins=50)
     plt.title("Low Gain Channel {}".format(i+1))
 
 plt.show()
