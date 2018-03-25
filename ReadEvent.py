@@ -51,8 +51,9 @@ def read_first_capacitor(event):
 
     return fc
 
+
 f = File("Run021.1.fits.fz")
-N = 10000
+N = 15000
 n_channels = 8
 n_modules = 19
 RoI = 40
@@ -60,9 +61,8 @@ size4drs = 4*1024
 
 hi_gain_samples = np.zeros((N, n_channels, RoI))
 low_gain_samples = np.zeros((N, n_channels, RoI))
-hiGain_Ch1 = np.zeros(40*N)
-mean_pedestal = np.zeros((n_channels, 2, size4drs))
-number_pedestal = np.zeros((n_channels, 2, size4drs))
+channel_pedestal = np.zeros((n_channels, 2, size4drs))
+number_pedestal_event = np.zeros((n_channels, 2, size4drs))
 
 for i in range(0, N):
     event = next(f.Events)
@@ -76,20 +76,45 @@ for i in range(0, N):
     for j in range(0, n_channels):
         for k in range(2, RoI-2):
             position = int((k+fc[0][j])%size4drs)
-            mean_pedestal[j, 0, position] += hi_gain_samples[i, j, k]
-            number_pedestal[j, 0, position] += 1
+            channel_pedestal[j, 0, position] += hi_gain_samples[i, j, k]
+            number_pedestal_event[j, 0, position] += 1
+
+
+mean_pedestal_high_gain = channel_pedestal[:, 0, :]/number_pedestal_event[:, 0, :]
+
+
+f2 = File("Run019_Periodic1kHz.fits.fz")
+N2 = 400
+hi_gain_samples2 = np.zeros((N2, n_channels, RoI))
+first_capacitor = np.zeros((N2, 2, 8))
+for i in range(0, N2):
+    event = next(f.Events)
+    hiGain, lowGain = translate_fits(event)
+    fc = read_first_capacitor(event)
+    for j in range(0, n_channels):
+        hi_gain_samples2[i, j, 0:40] = hiGain[j*40:(j+1)*40]
+        first_capacitor[i, 0, :] = fc[0, :]
 
 
 plt.figure()
 for i in range(0, 8):
     plt.subplot(2, 4, i+1)
-    plt.hist(hi_gain_samples[:, i, 2:38].flatten(), bins=50)
-    plt.title("Hi Gain Channel {}".format(i+1))
+    plt.hist(hi_gain_samples2[:, i, 2:38].flatten(), bins=50)
+    std = np.std(hi_gain_samples2[:, i, 2:38].flatten())
+    plt.title("Hi Gain Channel {}, $\sigma$ = {:.2f}.".format((i+1), std))
+
+
+for i in range(0, N2):
+    for j in range(0, n_channels):
+        for k in range(0, RoI):
+            position = int((k + first_capacitor[i, 0, j]) % size4drs)
+            hi_gain_samples2[i, j, k] -= mean_pedestal_high_gain[j, position]
 
 plt.figure()
 for i in range(0, 8):
     plt.subplot(2, 4, i+1)
-    plt.hist(low_gain_samples[:, i, 2:38].flatten(), bins=50)
-    plt.title("Low Gain Channel {}".format(i+1))
+    plt.hist(hi_gain_samples2[:, i, 2:38].flatten(), bins=50)
+    std = np.std(hi_gain_samples2[:, i, 2:38].flatten())
+    plt.title("Hi Gain Channel {}, $\sigma$ = {:.2f}.".format((i + 1), std))
 
 plt.show()
