@@ -1,7 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 from ctapipe.core import Container, Field
 from protozfits.simple import File
 
+from pedestal import PedestalSimple, remove_pedestal
 from tools import translate_fits
 
 
@@ -36,31 +39,6 @@ class Event:
             self.first_capacitor_low_gain[j] = fc[j]
 
 
-class PedestalSimple:
-    "Calculate pedestal as a function of an absolute position in DRS4"
-    n_channels = 8
-    RoI = 40
-    size4drs = 4*1024
 
-    def __init__(self):
-        self.channel_pedestal_value_high_gain = np.zeros((self.n_channels, self.size4drs))
-        self.number_of_event_high_gain = np.zeros((self.n_channels, self.size4drs))
-        self.mean_value_channel_high_gain = np.zeros((self.n_channels, self.size4drs))
 
-    def fill_pedestal_event(self, event):
-        for j in range(0, self.n_channels):
-            for k in range(2, self.RoI - 2):
-                # for high gain
-                position = int((k + event.first_capacitor_high_gain[j]) % self.size4drs)
-                self.channel_pedestal_value_high_gain[j, position] += event.samples_high_gain[j, k]
-                self.number_of_event_high_gain[j, position] += 1
 
-    def finalize_pedestal(self):
-        return self.mean_value_channel_high_gain/self.number_of_event_high_gain
-
-f = File("../Run021.1.fits.fz")
-ev = next(f.Events)
-Ev = Event(ev)
-Ev.read()
-ped = PedestalSimple()
-ped.fill_pedestal_event(Ev)
