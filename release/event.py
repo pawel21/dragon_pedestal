@@ -1,10 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 from ctapipe.core import Container, Field
-from protozfits.simple import File
 
-from pedestal import PedestalSimple, remove_pedestal
 from tools import translate_fits
 
 
