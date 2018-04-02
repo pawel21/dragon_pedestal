@@ -11,16 +11,17 @@ def plot_hist(event_data, gain):
     position = [(0,0), (0, 1), (0,2), (0,3),
                 (1,0), (1, 1), (1,2), (1,3)]
     fig, ax = plt.subplots(2,4)
-    for i in range(0, 8):
-        ax[position[i]].hist(event_data[:, i, 2:38].ravel(), bins=50, facecolor='green', alpha=0.75)
+    for i in range(0, 7):
+        ax[position[i]].hist(event_data[:, i, 2:38].ravel(), bins=50, facecolor='green', alpha=0.75, histtype='stepfilled')
         ax[position[i]].set_xlabel("signal [counts]")
         ax[position[i]].set_ylabel("number of events")
         sigma = np.std(event_data[:, i, 2:38].ravel())
         mu = np.mean(event_data[:, i, 2:38].ravel())
         ax[position[i]].set_title("{} Channel {}".format(gain, i + 1))
-        textstr = '$\mu=%.2f$\n$\sigma=%.2f$' % (mu, sigma)
+        textstr = '$\mu=%.2f$\n $\sigma=%.2f$' % (mu, sigma)
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax[position[i]].text(0.05, 0.95, textstr, transform=ax[position[i]].transAxes, fontsize=14, verticalalignment='top', bbox=props)
+    ax[position[7]].axis('off')
     plt.subplots_adjust(top=0.925, bottom=0.08, left=0.080, right=0.95, hspace=0.305, wspace=0.440)
 
 
@@ -60,6 +61,6 @@ def subtract_pedestal(file1, file2, N1=10000, N2=3000):
     plot_hist(event_low_gain_before_remove_pedestal, "Low Gain")
     plot_hist(event_low_gain_after_remove_pedestal, "Low Gain")
 
-subtract_pedestal("../data/Run021.1.fits.fz", "../data/Run027.2.fits.fz")
+subtract_pedestal("../data/Run021.1.fits.fz", "../data/Run026.1.fits.fz")
 plt.show()
 
